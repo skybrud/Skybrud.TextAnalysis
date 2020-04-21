@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Skybrud.TextAnalysis.Hunspell.Dictionary;
+using Skybrud.TextAnalysis.Hunspell.Extend;
 using Skybrud.TextAnalysis.Search;
 
 namespace Skybrud.TextAnalysis.Hunspell {
@@ -112,10 +113,27 @@ namespace Skybrud.TextAnalysis.Hunspell {
             return Hunspell.Suggest(word).ToArray();
         }
 
+        /// <summary>
+        /// Extends the specified <paramref name="text"/> with known variations based the dictionary and affix file.
+        /// </summary>
+        /// <param name="text">The text to extend.</param>
+        /// <returns>An instance of <see cref="HunspellExtendResult"/> with the result of the operation.</returns>
         public virtual HunspellExtendResult Extend(string text) {
+            return Extend(new HunspellExtendOptions(text));
+        }
+
+        /// <summary>
+        /// Extends the value of the <see cref="HunspellExtendOptions.Text"/> property of the specified <paramref name="options"/>.
+        /// </summary>
+        /// <param name="options">The options for extending <see cref="HunspellExtendOptions.Text"/>.</param>
+        /// <returns>A instance containing the extended result.</returns>
+        public virtual HunspellExtendResult Extend(HunspellExtendOptions options) {
+
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (string.IsNullOrWhiteSpace(options.Text)) throw new ArgumentNullException(nameof(options.Text));
 
             // Split the text query into multiple pieces so we can analyze each word separately
-            string[] pieces = text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] pieces = options.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             AndList query = new AndList();
 
