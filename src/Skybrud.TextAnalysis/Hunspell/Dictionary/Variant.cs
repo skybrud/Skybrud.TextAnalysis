@@ -1,4 +1,4 @@
-﻿namespace Skybrud.TextAnalysis.Hunspell {
+﻿namespace Skybrud.TextAnalysis.Hunspell.Dictionary {
 
     public class Variant {
 

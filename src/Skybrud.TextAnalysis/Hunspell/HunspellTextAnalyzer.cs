@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Skybrud.TextAnalysis.Hunspell.Dictionary;
 using Skybrud.TextAnalysis.Hunspell.Extend;
+using Skybrud.TextAnalysis.Hunspell.Stem;
 using Skybrud.TextAnalysis.Search;
 
 namespace Skybrud.TextAnalysis.Hunspell {
@@ -43,6 +44,16 @@ namespace Skybrud.TextAnalysis.Hunspell {
             Hunspell = hunspell;
             Affix = affix;
             Dictionary = dictionary;
+        }
+
+        /// <summary>
+        /// Initializes a new instance rom the specified <paramref name="wrapper"/> instances.
+        /// </summary>
+        /// <param name="wrapper">The Hunspell wrapper instance to be used.</param>
+        public HunspellTextAnalyzer(HunspellWrapper wrapper) {
+            Hunspell = wrapper.Hunspell;
+            Affix = wrapper.Affix;
+            Dictionary = wrapper.Dictionary;
         }
 
         #endregion
@@ -92,6 +103,7 @@ namespace Skybrud.TextAnalysis.Hunspell {
 
             List<string> temp = new List<string>();
 
+            // Look up the stem in the dictionary to get the variations
             if (Dictionary.TryGet(stem.Stem, out List<HunspellDictionaryItem> list)) {
                 foreach (HunspellDictionaryItem item in list) {
                     foreach (Variant variant in item.Variants) {
@@ -100,7 +112,11 @@ namespace Skybrud.TextAnalysis.Hunspell {
                 }
             }
 
-            return temp.ToArray();
+            // Append the stem and prefix - at least as a fallback
+            temp.Add(stem.Value);
+
+            // Return the variations as an array
+            return temp.Distinct().ToArray();
 
         }
 
@@ -137,17 +153,17 @@ namespace Skybrud.TextAnalysis.Hunspell {
 
             AndList query = new AndList();
 
-            List<List<Word>> temp1 = new List<List<Word>>();
+            List<List<HunspellExtendWord>> temp1 = new List<List<HunspellExtendWord>>();
 
             for (int i = 0; i < pieces.Length; i++) {
 
-                List<Word> temp2 = new List<Word>();
+                List<HunspellExtendWord> temp2 = new List<HunspellExtendWord>();
                 temp1.Add(temp2);
 
 
                 string piece = pieces[i];
 
-                temp2.Add(new Word(WordType.Input, piece));
+                temp2.Add(new HunspellExtendWord(HunspellExtendWordType.Input, piece));
 
                 OrList or = new OrList { Name = "O0" };
                 query.Query.Add(or);
@@ -186,56 +202,61 @@ namespace Skybrud.TextAnalysis.Hunspell {
                             AndList a2 = new AndList { Name = "A2" };
                             
                             if (Hunspell.Spell(x)) {
+                                
                                 OrList or1 = new OrList { Name = "O1" };
-                                foreach (var stem in Hunspell.Stem(x)) {
-                                    if (Dictionary.TryGet(stem, out var list)) {
-                                        foreach (HunspellDictionaryItem item in list) {
-                                            foreach (Variant variant in item.Variants) {
-                                                or1.Append(variant.Value);
-                                            }
-                                        }
+                                
+                                // Iterate over the stem(s) of the specified word
+                                foreach (HunspellStemResult stem in Stem(x)) {
+
+                                    // Append each variant/morph to the list
+                                    foreach (string variant in Morph(stem)) {
+                                        or1.Append(variant);
                                     }
-                                    else {
-                                        or1.Append(stem);
-                                    }
+
                                 }
+                                
                                 a2.Query.Add(or1);
+
                             } else {
                                 a2.Append(x);
                             }
 
                             if (Hunspell.Spell(y)) {
+                                
                                 OrList or2 = new OrList { Name = "O2" };
-                                foreach (var stem in Hunspell.Stem(y)) {
-                                    if (Dictionary.TryGet(stem, out var list)) {
-                                        foreach (HunspellDictionaryItem item in list) {
-                                            foreach (Variant variant in item.Variants) {
-                                                or2.Append(variant.Value);
-                                            }
-                                        }
+
+                                // Iterate over the stem(s) of the specified word
+                                foreach (HunspellStemResult stem in Stem(y)) {
+                                    
+                                    // Append each variant/morph to the list
+                                    foreach (string variant in Morph(stem)) {
+                                        or2.Append(variant);
                                     }
-                                    else {
-                                        or2.Append(stem);
-                                    }
+
                                 }
+                                
                                 a2.Query.Add(or2);
+
                             } else {
                                 a2.Append(y);
                             }
 
                             or.Query.Add(a2);
 
-                            foreach (string stem in Hunspell.Stem(z)) {
-                                temp2.Add(Word.Suggestion(stem, z));
+                            // Iterate over the stem(s) of "z"
+                            foreach (HunspellStemResult stem in Stem(z)) {
+                                
+                                temp2.Add(HunspellExtendWord.Suggestion(stem.Prefix + stem.Stem, z));
+                                
                                 OrList or3 = new OrList { Name = "O3" };
-                                if (Dictionary.TryGet(stem, out var items)) {
-                                    foreach (HunspellDictionaryItem item in items) {
-                                        foreach (Variant variant in item.Variants) {
-                                            or3.Append(variant.Value);
-                                        }
-                                    }
+
+                                // Append each variant/morph to the list
+                                foreach (string variant in Morph(stem)) {
+                                    or3.Append(variant);
                                 }
+
                                 if (or3.Count > 0) or.Query.Add(or3);
+
                             }
 
                             i++;
@@ -248,22 +269,19 @@ namespace Skybrud.TextAnalysis.Hunspell {
                     
                     OrList or4 = new OrList { Name = "O4" };
 
-                    foreach (string stem in Hunspell.Stem(piece)) {
+                    // Iterate over the stem(s) of "piece"
+                    foreach (HunspellStemResult stem in Stem(piece)) {
 
                         // Append the stem if it isn't equal to the input
-                        if (piece != stem) temp2.Add(Word.Stem(stem, piece));
-
-                        // Lookup the stem in the custom dictionary
-                        if (Dictionary.TryGet(stem, out var items)) {
-                            foreach (HunspellDictionaryItem item in items) {
-                                foreach (Variant variant in item.Variants) {
-                                    or4.Append(variant.Value);
-                                }
-                            }
+                        if (piece != stem.Value) temp2.Add(HunspellExtendWord.Stem(stem.Value, piece));
+                        
+                        // Append each variant/morph to the list
+                        foreach (string variant in Morph(stem)) {
+                            or4.Append(variant);
                         }
 
                         // Fallback: append the stem if it wasn't found in the custom dictionary
-                        or4.Append(stem);
+                        or4.Append(stem.Value);
 
                     }
 
@@ -283,6 +301,7 @@ namespace Skybrud.TextAnalysis.Hunspell {
                         string y = pieces[i + 1];
                         string z = x + y;
 
+                        // Are "x" and "y" spelled correctly when put together as a single word? (eg. compound words in Danish)
                         if (Hunspell.Spell(z)) {
 
                             AndList and = new AndList();
@@ -291,34 +310,38 @@ namespace Skybrud.TextAnalysis.Hunspell {
                             and.Append(x);
 
                             if (Hunspell.Spell(y)) {
+                                
                                 OrList or2 = new OrList();
                                 and.Query.Add(or2);
-                                foreach (string stem in Hunspell.Stem(y)) {
-                                    if (Dictionary.TryGet(stem, out var list)) {
-                                        foreach (HunspellDictionaryItem item in list) {
-                                            foreach (Variant variant in item.Variants) {
-                                                or2.Append(variant.Value);
-                                            }
-                                        }
+
+                                // Iterate over the stem(s) of "y"
+                                foreach (HunspellStemResult stem in Stem(y)) {
+
+                                    // Append each variant/morph to the list
+                                    foreach (string variant in Morph(stem)) {
+                                        or2.Append(variant);
                                     }
-                                    else {
-                                        or2.Append(stem);
-                                    }
+
                                 }
+
                             } else {
+                            
                                 and.Append(y);
+
                             }
 
                             OrList or5 = new OrList();
-                            foreach (string stem in Hunspell.Stem(z)) {
-                                if (z != stem) temp2.Add(Word.Stem(stem, z));
-                                if (Dictionary.TryGet(stem, out var items)) {
-                                    foreach (HunspellDictionaryItem item in items) {
-                                        foreach (Variant variant in item.Variants) {
-                                            or5.Append(variant.Value);
-                                        }
-                                    }
+
+                            // Iterate over the stem(s) of "z"
+                            foreach (HunspellStemResult stem in Stem(z)) {
+                            
+                                if (z != stem.Value) temp2.Add(HunspellExtendWord.Stem(stem.Value, z));
+
+                                // Append each variant/morph to the list
+                                foreach (string variant in Morph(stem)) {
+                                    or5.Append(variant);
                                 }
+
                             }
 
                             if (or5.Query.Any()) {
@@ -336,29 +359,28 @@ namespace Skybrud.TextAnalysis.Hunspell {
 
                     or.Append(piece);
 
-                    foreach (string suggestion in Hunspell.Suggest(piece)) {
-                        temp2.Add(new Word(WordType.Suggestion, suggestion));
+                    foreach (string suggestion in Suggest(piece)) {
+
+                        // Calculate the Levenshtein distance
+                        int distance = Levenshtein(piece, suggestion);
+
+                        // Skip the suggestion if the Levenshtein distance is higher than the allowed maximum
+                        if (options.MaxDistance > 0 && distance > options.MaxDistance) continue;
+                        
+                        temp2.Add(new HunspellExtendWord(HunspellExtendWordType.Suggestion, suggestion, "Levenshtein: " + distance));
                         or.Append(suggestion);
 
-                        foreach (string stem in Hunspell.Stem(suggestion)) {
-                            if (Dictionary.TryGet(stem, out var list)) {
-                                foreach (HunspellDictionaryItem item in list) {
-                                    foreach (Variant variant in item.Variants) {
-                                        or.Append(variant.Value);
-                                    }
-                                }
-                            } else {
-                                or.Append(stem);
+                        // Iterate over the stem(s) of "suggestion"
+                        foreach (HunspellStemResult stem in Stem(suggestion)) {
+
+                            // Append each variant/morph to the list
+                            foreach (string variant in Morph(stem)) {
+                                or.Append(variant);
                             }
+
                         }
 
                     }
-
-                    //if (i < pieces.Length - 1) {
-                    //    foreach (var suggestion in hunspell.Suggest(piece + " " + pieces[i + 1])) {
-                    //        temp2.Add(new Word(WordType.Suggestion, suggestion));
-                    //    }
-                    //}
 
                 }
 
