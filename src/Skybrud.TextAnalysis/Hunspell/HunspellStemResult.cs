@@ -1,12 +1,12 @@
 ﻿namespace Skybrud.TextAnalysis.Hunspell {
     
-    public class StemResult {
+    public class HunspellStemResult {
 
         public string Prefix { get; }
 
         public string Stem { get; }
 
-        public StemResult(string stem, string prefix) {
+        public HunspellStemResult(string stem, string prefix) {
             Prefix = prefix ?? string.Empty;
             Stem = stem;
         }

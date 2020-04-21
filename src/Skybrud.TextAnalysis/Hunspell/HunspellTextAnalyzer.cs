@@ -1,26 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Skybrud.TextAnalysis.Hunspell;
+using Skybrud.TextAnalysis.Hunspell.Dictionary;
 using Skybrud.TextAnalysis.Search;
 
-namespace Skybrud.TextAnalysis {
+namespace Skybrud.TextAnalysis.Hunspell {
 
+    /// <summary>
+    /// Wrapper class for <see cref="NHunspell.Hunspell"/>, <see cref="Affix"/> and <see cref="HunspellDictionary"/>.
+    /// </summary>
     public class HunspellTextAnalyzer {
 
         #region Properties
 
+        /// <summary>
+        /// Gets a reference to the underlying <see cref="NHunspell.Hunspell"/>.
+        /// </summary>
         public NHunspell.Hunspell Hunspell { get; }
 
-        public Affix Affix { get; }
+        /// <summary>
+        /// Gets a reference to the underlying <see cref="Affix"/>.
+        /// </summary>
+        public Affix.HunspellAffix Affix { get; }
 
-        public MyDictionary Dictionary { get; }
+        /// <summary>
+        /// Gets a reference to the underlying <see cref="HunspellDictionary"/>.
+        /// </summary>
+        public HunspellDictionary Dictionary { get; }
 
         #endregion
 
         #region Constructors
 
-        public HunspellTextAnalyzer(NHunspell.Hunspell hunspell, Affix affix, MyDictionary dictionary) {
+        /// <summary>
+        /// Initializes a new instance rom the specified <paramref name="hunspell"/>, <paramref name="affix"/> and <paramref name="dictionary"/> instances.
+        /// </summary>
+        /// <param name="hunspell">The Hunspell instance to be used.</param>
+        /// <param name="affix">The affix instance to be used.</param>
+        /// <param name="dictionary">The custom dictionary to be used.</param>
+        public HunspellTextAnalyzer(NHunspell.Hunspell hunspell, Affix.HunspellAffix affix, HunspellDictionary dictionary) {
             Hunspell = hunspell;
             Affix = affix;
             Dictionary = dictionary;
@@ -44,20 +62,20 @@ namespace Skybrud.TextAnalysis {
         /// Gets an array of stems for the specified <paramref name="word"/>.
         /// </summary>
         /// <param name="word">The word to get the stem(s) for.</param>
-        /// <returns>An array of <see cref="StemResult"/>.</returns>
+        /// <returns>An array of <see cref="HunspellStemResult"/>.</returns>
         /// <remarks>This method is similar to the <see cref="NHunspell.Hunspell.Stem"/> method, but differs in the way
         /// that has better support for working with compound words. For instance in Danish, the stem of
         /// <c>webredaktør</c> is <c>redaktør</c> because <c>webredaktør</c> isn't in the dictionary. And if we try to
         /// morph the stem, we get variations of <c>redaktør</c> instead of <c>webredaktør</c>. When morphing an
-        /// instance of <see cref="StemResult"/>, the prefix (if any) is kept in the morphed variations.
+        /// instance of <see cref="HunspellStemResult"/>, the prefix (if any) is kept in the morphed variations.
         /// </remarks>
-        public StemResult[] Stem(string word) {
+        public HunspellStemResult[] Stem(string word) {
 
-            List<StemResult> temp = new List<StemResult>();
+            List<HunspellStemResult> temp = new List<HunspellStemResult>();
 
             foreach (string stem in Hunspell.Stem(word)) {
                 int pos = word.IndexOf(stem, StringComparison.InvariantCultureIgnoreCase);
-                temp.Add(new StemResult(stem, pos > 0 ? word.Substring(0, pos) : null));
+                temp.Add(new HunspellStemResult(stem, pos > 0 ? word.Substring(0, pos) : null));
             }
 
             return temp.ToArray();
@@ -69,12 +87,12 @@ namespace Skybrud.TextAnalysis {
         /// </summary>
         /// <param name="stem">The stem word to morph.</param>
         /// <returns>An array of the morphed variations.</returns>
-        public string[] Morph(StemResult stem) {
+        public string[] Morph(HunspellStemResult stem) {
 
             List<string> temp = new List<string>();
 
-            if (Dictionary.TryGet(stem.Stem, out List<MyDictionaryItem> list)) {
-                foreach (MyDictionaryItem item in list) {
+            if (Dictionary.TryGet(stem.Stem, out List<HunspellDictionaryItem> list)) {
+                foreach (HunspellDictionaryItem item in list) {
                     foreach (Variant variant in item.Variants) {
                         temp.Add(stem.Prefix + variant.Value);
                     }
@@ -85,11 +103,16 @@ namespace Skybrud.TextAnalysis {
 
         }
 
+        /// <summary>
+        /// Returns an array of suggestions based on the specified <paramref name="word"/>.
+        /// </summary>
+        /// <param name="word">The (misspelled) word.</param>
+        /// <returns>An array of suggestions.</returns>
         public string[] Suggest(string word) {
             return Hunspell.Suggest(word).ToArray();
         }
 
-        public TextExtendResult Extend(string text) {
+        public virtual HunspellExtendResult Extend(string text) {
 
             // Split the text query into multiple pieces so we can analyze each word separately
             string[] pieces = text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -148,7 +171,7 @@ namespace Skybrud.TextAnalysis {
                                 OrList or1 = new OrList { Name = "O1" };
                                 foreach (var stem in Hunspell.Stem(x)) {
                                     if (Dictionary.TryGet(stem, out var list)) {
-                                        foreach (MyDictionaryItem item in list) {
+                                        foreach (HunspellDictionaryItem item in list) {
                                             foreach (Variant variant in item.Variants) {
                                                 or1.Append(variant.Value);
                                             }
@@ -167,7 +190,7 @@ namespace Skybrud.TextAnalysis {
                                 OrList or2 = new OrList { Name = "O2" };
                                 foreach (var stem in Hunspell.Stem(y)) {
                                     if (Dictionary.TryGet(stem, out var list)) {
-                                        foreach (MyDictionaryItem item in list) {
+                                        foreach (HunspellDictionaryItem item in list) {
                                             foreach (Variant variant in item.Variants) {
                                                 or2.Append(variant.Value);
                                             }
@@ -188,7 +211,7 @@ namespace Skybrud.TextAnalysis {
                                 temp2.Add(Word.Suggestion(stem, z));
                                 OrList or3 = new OrList { Name = "O3" };
                                 if (Dictionary.TryGet(stem, out var items)) {
-                                    foreach (MyDictionaryItem item in items) {
+                                    foreach (HunspellDictionaryItem item in items) {
                                         foreach (Variant variant in item.Variants) {
                                             or3.Append(variant.Value);
                                         }
@@ -214,7 +237,7 @@ namespace Skybrud.TextAnalysis {
 
                         // Lookup the stem in the custom dictionary
                         if (Dictionary.TryGet(stem, out var items)) {
-                            foreach (MyDictionaryItem item in items) {
+                            foreach (HunspellDictionaryItem item in items) {
                                 foreach (Variant variant in item.Variants) {
                                     or4.Append(variant.Value);
                                 }
@@ -254,7 +277,7 @@ namespace Skybrud.TextAnalysis {
                                 and.Query.Add(or2);
                                 foreach (string stem in Hunspell.Stem(y)) {
                                     if (Dictionary.TryGet(stem, out var list)) {
-                                        foreach (MyDictionaryItem item in list) {
+                                        foreach (HunspellDictionaryItem item in list) {
                                             foreach (Variant variant in item.Variants) {
                                                 or2.Append(variant.Value);
                                             }
@@ -272,7 +295,7 @@ namespace Skybrud.TextAnalysis {
                             foreach (string stem in Hunspell.Stem(z)) {
                                 if (z != stem) temp2.Add(Word.Stem(stem, z));
                                 if (Dictionary.TryGet(stem, out var items)) {
-                                    foreach (MyDictionaryItem item in items) {
+                                    foreach (HunspellDictionaryItem item in items) {
                                         foreach (Variant variant in item.Variants) {
                                             or5.Append(variant.Value);
                                         }
@@ -301,7 +324,7 @@ namespace Skybrud.TextAnalysis {
 
                         foreach (string stem in Hunspell.Stem(suggestion)) {
                             if (Dictionary.TryGet(stem, out var list)) {
-                                foreach (MyDictionaryItem item in list) {
+                                foreach (HunspellDictionaryItem item in list) {
                                     foreach (Variant variant in item.Variants) {
                                         or.Append(variant.Value);
                                     }
@@ -323,14 +346,16 @@ namespace Skybrud.TextAnalysis {
 
             }
 
-            return new TextExtendResult(temp1.Select(x => x.ToArray()).ToArray(), query);
+            return new HunspellExtendResult(temp1.Select(x => x.ToArray()).ToArray(), query);
 
         }
 
         /// <summary>
         /// Computes the Levenshtein distance between two strings.
         /// </summary>
-        /// <see cref="http://www.dotnetperls.com/levenshtein" />
+        /// <see>
+        ///     <cref>http://www.dotnetperls.com/levenshtein</cref>
+        /// </see>
         public int Levenshtein(string s, string t) {
             
             int n = s.Length;

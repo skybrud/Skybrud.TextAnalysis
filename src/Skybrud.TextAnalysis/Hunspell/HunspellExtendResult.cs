@@ -2,13 +2,13 @@
 
 namespace Skybrud.TextAnalysis.Hunspell {
 
-    public class TextExtendResult {
+    public class HunspellExtendResult {
 
         public Word[][] Words { get; }
 
         public AndList Query { get; }
 
-        public TextExtendResult(Word[][] words, AndList query) {
+        public HunspellExtendResult(Word[][] words, AndList query) {
             Words = words;
             Query = query;
         }
