@@ -26,8 +26,15 @@
 
         #region Constructors
 
+        /// <summary>
+        /// Initializes a new instance with default options.
+        /// </summary>
         public HunspellExpandOptions() { }
 
+        /// <summary>
+        /// Initializes a new instance based on the specified <paramref name="text"/>.
+        /// </summary>
+        /// <param name="text">Gets or sets the text. This will typically be the raw string the user enters into the search field.</param>
         public HunspellExpandOptions(string text) {
             Text = text;
         }
