@@ -1,6 +1,6 @@
-﻿namespace Skybrud.TextAnalysis.Hunspell {
+﻿namespace Skybrud.TextAnalysis.Hunspell.Expand {
     
-    public enum HunspellExtendWordType {
+    public enum HunspellExpandWordType {
         
         Input,
         

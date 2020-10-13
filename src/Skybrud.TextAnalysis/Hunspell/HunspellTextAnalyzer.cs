@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Skybrud.TextAnalysis.Hunspell.Dictionary;
-using Skybrud.TextAnalysis.Hunspell.Extend;
+using Skybrud.TextAnalysis.Hunspell.Expand;
 using Skybrud.TextAnalysis.Hunspell.Stem;
 using Skybrud.TextAnalysis.Search;
 
@@ -130,20 +130,20 @@ namespace Skybrud.TextAnalysis.Hunspell {
         }
 
         /// <summary>
-        /// Extends the specified <paramref name="text"/> with known variations based the dictionary and affix file.
+        /// Expands the specified <paramref name="text"/> with known variations based the dictionary and affix file.
         /// </summary>
         /// <param name="text">The text to extend.</param>
-        /// <returns>An instance of <see cref="HunspellExtendResult"/> with the result of the operation.</returns>
-        public virtual HunspellExtendResult Extend(string text) {
-            return Extend(new HunspellExtendOptions(text));
+        /// <returns>An instance of <see cref="HunspellExpandResult"/> with the result of the operation.</returns>
+        public virtual HunspellExpandResult Extend(string text) {
+            return Expand(new HunspellExpandOptions(text));
         }
 
         /// <summary>
-        /// Extends the value of the <see cref="HunspellExtendOptions.Text"/> property of the specified <paramref name="options"/>.
+        /// Expands the value of the <see cref="HunspellExpandOptions.Text"/> property of the specified <paramref name="options"/>.
         /// </summary>
-        /// <param name="options">The options for extending <see cref="HunspellExtendOptions.Text"/>.</param>
+        /// <param name="options">The options for expanding <see cref="HunspellExpandOptions.Text"/>.</param>
         /// <returns>A instance containing the extended result.</returns>
-        public virtual HunspellExtendResult Extend(HunspellExtendOptions options) {
+        public virtual HunspellExpandResult Expand(HunspellExpandOptions options) {
 
             if (options == null) throw new ArgumentNullException(nameof(options));
             if (string.IsNullOrWhiteSpace(options.Text)) throw new ArgumentNullException(nameof(options.Text));
@@ -153,17 +153,17 @@ namespace Skybrud.TextAnalysis.Hunspell {
 
             AndList query = new AndList();
 
-            List<List<HunspellExtendWord>> temp1 = new List<List<HunspellExtendWord>>();
+            List<List<HunspellExpandWord>> temp1 = new List<List<HunspellExpandWord>>();
 
             for (int i = 0; i < pieces.Length; i++) {
 
-                List<HunspellExtendWord> temp2 = new List<HunspellExtendWord>();
+                List<HunspellExpandWord> temp2 = new List<HunspellExpandWord>();
                 temp1.Add(temp2);
 
 
                 string piece = pieces[i];
 
-                temp2.Add(new HunspellExtendWord(HunspellExtendWordType.Input, piece));
+                temp2.Add(new HunspellExpandWord(HunspellExpandWordType.Input, piece));
 
                 OrList or = new OrList { Name = "O0" };
                 query.Query.Add(or);
@@ -246,7 +246,7 @@ namespace Skybrud.TextAnalysis.Hunspell {
                             // Iterate over the stem(s) of "z"
                             foreach (HunspellStemResult stem in Stem(z)) {
                                 
-                                temp2.Add(HunspellExtendWord.Suggestion(stem.Prefix + stem.Stem, z));
+                                temp2.Add(HunspellExpandWord.Suggestion(stem.Prefix + stem.Stem, z));
                                 
                                 OrList or3 = new OrList { Name = "O3" };
 
@@ -273,7 +273,7 @@ namespace Skybrud.TextAnalysis.Hunspell {
                     foreach (HunspellStemResult stem in Stem(piece)) {
 
                         // Append the stem if it isn't equal to the input
-                        if (piece != stem.Value) temp2.Add(HunspellExtendWord.Stem(stem.Value, piece));
+                        if (piece != stem.Value) temp2.Add(HunspellExpandWord.Stem(stem.Value, piece));
                         
                         // Append each variant/morph to the list
                         foreach (string variant in Morph(stem)) {
@@ -335,7 +335,7 @@ namespace Skybrud.TextAnalysis.Hunspell {
                             // Iterate over the stem(s) of "z"
                             foreach (HunspellStemResult stem in Stem(z)) {
                             
-                                if (z != stem.Value) temp2.Add(HunspellExtendWord.Stem(stem.Value, z));
+                                if (z != stem.Value) temp2.Add(HunspellExpandWord.Stem(stem.Value, z));
 
                                 // Append each variant/morph to the list
                                 foreach (string variant in Morph(stem)) {
@@ -367,7 +367,7 @@ namespace Skybrud.TextAnalysis.Hunspell {
                         // Skip the suggestion if the Levenshtein distance is higher than the allowed maximum
                         if (options.MaxDistance > 0 && distance > options.MaxDistance) continue;
                         
-                        temp2.Add(new HunspellExtendWord(HunspellExtendWordType.Suggestion, suggestion, "Levenshtein: " + distance));
+                        temp2.Add(new HunspellExpandWord(HunspellExpandWordType.Suggestion, suggestion, "Levenshtein: " + distance));
                         or.Append(suggestion);
 
                         // Iterate over the stem(s) of "suggestion"
@@ -386,7 +386,7 @@ namespace Skybrud.TextAnalysis.Hunspell {
 
             }
 
-            return new HunspellExtendResult(options.Text, temp1.Select(x => x.ToArray()).ToArray(), query);
+            return new HunspellExpandResult(options.Text, temp1.Select(x => x.ToArray()).ToArray(), query);
 
         }
 

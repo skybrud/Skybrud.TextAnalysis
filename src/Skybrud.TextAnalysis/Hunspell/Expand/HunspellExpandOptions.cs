@@ -1,22 +1,21 @@
-﻿namespace Skybrud.TextAnalysis.Hunspell.Extend {
+﻿namespace Skybrud.TextAnalysis.Hunspell.Expand {
 
     /// <summary>
-    /// Class with options for the <see cref="HunspellTextAnalyzer.Extend(HunspellExtendOptions)"/> method.
+    /// Class with options for the <see cref="HunspellTextAnalyzer.Expand(HunspellExpandOptions)"/> method.
     /// </summary>
-    public class HunspellExtendOptions {
+    public class HunspellExpandOptions {
 
         #region Properties
 
         /// <summary>
-        /// Gets or sets the text. For a search, this will typically be the raw string the user enters into the search
-        /// field.
+        /// Gets or sets the text. For a search, this will typically be the raw string the user enters into the search field.
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum Levenshtein distance.
         /// </summary>
-        /// <remarks>For misspelled words, the <see cref="HunspellTextAnalyzer.Extend(HunspellExtendOptions)"/> method
+        /// <remarks>For misspelled words, the <see cref="HunspellTextAnalyzer.Expand(HunspellExpandOptions)"/> method
         /// will automatically use the dictionary to find suggestions. The Levenshtein algorithm is then used to
         /// compute the distance between the input word and the suggested word. Low distance means high similarity.
         ///
@@ -27,9 +26,9 @@
 
         #region Constructors
 
-        public HunspellExtendOptions() { }
+        public HunspellExpandOptions() { }
 
-        public HunspellExtendOptions(string text) {
+        public HunspellExpandOptions(string text) {
             Text = text;
         }
 
