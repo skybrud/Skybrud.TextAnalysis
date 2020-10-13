@@ -396,8 +396,10 @@ namespace Skybrud.TextAnalysis.Hunspell {
         /// <see>
         ///     <cref>http://www.dotnetperls.com/levenshtein</cref>
         /// </see>
-        public int Levenshtein(string s, string t) {
-            
+        private int Levenshtein(string s, string t) {
+
+            // TODO: Use Skybrud.Essentials.Strings.StringUtils.Levenshtein instead
+
             int n = s.Length;
             int m = t.Length;
             int[,] d = new int[n + 1, m + 1];
@@ -437,6 +439,7 @@ namespace Skybrud.TextAnalysis.Hunspell {
         }
 
         private bool IsAlpha(string value) {
+            // TODO: Use Skybrud.Essentials.Strings.StringUtils.IsAlphabetic instead
             return value?.All(char.IsLetter) ?? false;
         }
 
