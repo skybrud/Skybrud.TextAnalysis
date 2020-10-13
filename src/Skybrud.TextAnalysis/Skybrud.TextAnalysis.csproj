@@ -30,16 +30,7 @@
 
   <ItemGroup>
     <PackageReference Include="NHunspell" Version="1.2.5554.16953" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!--<Reference Include="NHunspell, Version=1.2.5554.16953, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL">
-      <HintPath>..\packages\NHunspell.1.2.5554.16953\lib\net\NHunspell.dll</HintPath>
-    </Reference>-->
-    <Reference Include="Skybrud.Umbraco.Search, Version=1.0.12.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\assemblies\Skybrud.Umbraco.Search.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Skybrud.Umbraco.Search" Version="3.0.0-beta001" />
   </ItemGroup>
 
   <ItemGroup>
