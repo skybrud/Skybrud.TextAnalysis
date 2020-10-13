@@ -134,7 +134,7 @@ namespace Skybrud.TextAnalysis.Hunspell {
         /// </summary>
         /// <param name="text">The text to extend.</param>
         /// <returns>An instance of <see cref="HunspellExpandResult"/> with the result of the operation.</returns>
-        public virtual HunspellExpandResult Extend(string text) {
+        public virtual HunspellExpandResult Expand(string text) {
             return Expand(new HunspellExpandOptions(text));
         }
 
