@@ -386,7 +386,7 @@ namespace Skybrud.TextAnalysis.Hunspell {
 
             }
 
-            return new HunspellExtendResult(temp1.Select(x => x.ToArray()).ToArray(), query);
+            return new HunspellExtendResult(options.Text, temp1.Select(x => x.ToArray()).ToArray(), query);
 
         }
 
