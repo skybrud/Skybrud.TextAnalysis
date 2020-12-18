@@ -269,6 +269,9 @@ namespace Skybrud.TextAnalysis.Hunspell {
                     
                     OrList or4 = new OrList { Name = "O4" };
 
+                    // Append the input word
+                    or4.Append(piece);
+
                     // Iterate over the stem(s) of "piece"
                     foreach (HunspellStemResult stem in Stem(piece)) {
 
