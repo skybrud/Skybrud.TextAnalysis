@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Skybrud.Umbraco.Search.Options.Fields;
 
 namespace Skybrud.TextAnalysis.Search {
 
