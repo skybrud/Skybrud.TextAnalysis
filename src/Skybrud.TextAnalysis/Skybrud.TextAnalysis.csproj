@@ -30,7 +30,6 @@
 
   <ItemGroup>
     <PackageReference Include="NHunspell" Version="1.2.5554.16953" />
-    <PackageReference Include="Skybrud.Umbraco.Search" Version="3.0.0-beta001" />
   </ItemGroup>
 
   <ItemGroup>

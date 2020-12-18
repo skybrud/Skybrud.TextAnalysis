@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Skybrud.Umbraco.Search.Options.Fields;
 
 namespace Skybrud.TextAnalysis.Search {
@@ -84,11 +85,20 @@ namespace Skybrud.TextAnalysis.Search {
         }
 
         /// <summary>
-        /// Returns the raw query for the specified list of <paramref name="fields"/>.
+        /// Returns the raw query for the specified collection of <paramref name="fields"/>.
         /// </summary>
-        /// <param name="fields">The list fields.</param>
+        /// <param name="fields">The collection fields.</param>
         /// <returns>A string representing the raw query.</returns>
-        public string ToRawQuery(FieldList fields) {
+        public string ToRawQuery(IEnumerable<Field> fields) {
+            return ToRawQuery(fields.ToArray());
+        }
+
+        /// <summary>
+        /// Returns the raw query for the specified array of <paramref name="fields"/>.
+        /// </summary>
+        /// <param name="fields">The array fields.</param>
+        /// <returns>A string representing the raw query.</returns>
+        public string ToRawQuery(Field[] fields) {
 
             List<string> temp = new List<string>();
 
