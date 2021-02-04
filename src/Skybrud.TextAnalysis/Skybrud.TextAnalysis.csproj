@@ -10,22 +10,22 @@
     <Version>1.0.2</Version>
     <Authors>Anders Bjerner</Authors>
     <Company>Skybrud.dk</Company>
-    <Description>Hunspell text analasis package for .NET.</Description>
+    <Description>Hunspell text analysis package for .NET.</Description>
     <Copyright>Copyright © 2020</Copyright>
   </PropertyGroup>
 
   <!--<PropertyGroup>
-    <PackageId>Skybrud.TextAnalasis</PackageId>
-    <PackageTags>Skybrud, Text, Analasis, Hunspell</PackageTags>
+    <PackageId>Skybrud.Analysis</PackageId>
+    <PackageTags>Skybrud, Text, Analysis, Hunspell</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://packages.skybrud.dk/skybrud.textanalasis/</PackageProjectUrl>
+    <PackageProjectUrl>https://packages.skybrud.dk/skybrud.analysis/</PackageProjectUrl>
     <PackageIconUrl>http://www.skybrud.dk/img/5431sk/icon/favicon.ico</PackageIconUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/skybrud/Skybrud.TextAnalsis</RepositoryUrl>
+    <RepositoryUrl>https://github.com/skybrud/Skybrud.TextAnalysis</RepositoryUrl>
   </PropertyGroup>-->
 
   <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Skybrud.TextAnalasis.xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\Skybrud.Analysis.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
