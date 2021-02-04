@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Skybrud.Analysis</PackageId>
+    <PackageId>Skybrud.TextAnalysis</PackageId>
     <PackageTags>Skybrud, Text, Analysis, Hunspell</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <!--<PackageProjectUrl>https://packages.skybrud.dk/skybrud.textanalysis/</PackageProjectUrl>-->
