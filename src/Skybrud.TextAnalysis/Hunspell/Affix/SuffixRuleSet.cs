@@ -29,6 +29,12 @@ namespace Skybrud.TextAnalysis.Hunspell.Affix {
 
         #region Constructors
 
+        /// <summary>
+        /// Initializes a new rule set based on the specified <paramref name="name"/>, <paramref name="comment"/> and array of <paramref name="rules"/>.
+        /// </summary>
+        /// <param name="name">The name of the rule set.</param>
+        /// <param name="comment">An optional comment about the rule set.</param>
+        /// <param name="rules">The individual rules of the rule set.</param>
         public SuffixRuleSet(string name, string comment, string[] rules) {
             Name = name;
             Comment = comment;
@@ -39,6 +45,10 @@ namespace Skybrud.TextAnalysis.Hunspell.Affix {
 
         #region Member methods
 
+        /// <summary>
+        /// Processes the specified <paramref name="item"/>.
+        /// </summary>
+        /// <param name="item">The dictionary item to parse.</param>
         public void Process(HunspellDictionaryItem item) {
             foreach (SuffixRule rule in Rules) {
                 rule.Process(item);

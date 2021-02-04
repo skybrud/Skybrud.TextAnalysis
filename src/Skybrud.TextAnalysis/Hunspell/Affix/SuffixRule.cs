@@ -55,6 +55,10 @@ namespace Skybrud.TextAnalysis.Hunspell.Affix {
 
         }
 
+        /// <summary>
+        /// Processes the specified <paramref name="item"/>.
+        /// </summary>
+        /// <param name="item">The dictionary item to parse.</param>
         public void Process(HunspellDictionaryItem item) {
 
             Match m1 = Regex.Match(Value3, "^([0-9a-zA-Z]+)$");
