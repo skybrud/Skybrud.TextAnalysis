@@ -360,9 +360,44 @@ namespace Skybrud.TextAnalysis.Hunspell {
 
                     }
 
+                    // Get the suggestions for "piece"
+                    string[] suggestions = Suggest(piece);
+
+                    // If case insensitivity is enabled, we're looking for a suggestion that is spelled the same way,
+                    // but with different casing. If a match is found, all other suggestions are ignored as they may
+                    // lead to a higher amount of "unrelated" search results.
+                    //
+                    // This will typically be the case if the user enters a name in lowercase (eg. "ole" instead of "Ole"),
+                    // which then technically is a spelling error. The same may be the case for abbreviations.
+                    if (options.CaseInsentive) {
+                        
+                        string insensitiveMatch = suggestions.FirstOrDefault(x => string.Equals(x, piece, StringComparison.InvariantCultureIgnoreCase));
+
+                        if (insensitiveMatch != null) {
+
+                            // Append the match with the correct casing
+                            or.Append(insensitiveMatch);
+
+                            // Iterate over the stem(s) of "suggestion"
+                            foreach (HunspellStemResult stem in Stem(insensitiveMatch)) {
+
+                                // Append each variant/morph to the list
+                                foreach (string variant in Morph(stem)) {
+                                    or.Append(variant);
+                                }
+
+                            }
+
+                            continue;
+
+                        }
+
+                    }
+
+                    // Append the word as entered by the user
                     or.Append(piece);
 
-                    foreach (string suggestion in Suggest(piece)) {
+                    foreach (string suggestion in suggestions) {
 
                         // Calculate the Levenshtein distance
                         int distance = Levenshtein(piece, suggestion);

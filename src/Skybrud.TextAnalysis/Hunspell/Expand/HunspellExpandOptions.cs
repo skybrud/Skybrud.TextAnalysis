@@ -22,6 +22,12 @@
         /// If specified, suggested words with a distance highter than the value of this property will be ignored.</remarks>
         public int MaxDistance { get; set; }
 
+        /// <summary>
+        /// Gets or sets whether the expand should be case insensitive.
+        /// </summary>
+        /// <remarks>This option may not be fully implemented throughout the expand implementation.</remarks>
+        public bool CaseInsentive { get; set; }
+
         #endregion
 
         #region Constructors
@@ -29,7 +35,9 @@
         /// <summary>
         /// Initializes a new instance with default options.
         /// </summary>
-        public HunspellExpandOptions() { }
+        public HunspellExpandOptions() {
+            CaseInsentive = true;
+        }
 
         /// <summary>
         /// Initializes a new instance based on the specified <paramref name="text"/>.
@@ -37,6 +45,7 @@
         /// <param name="text">Gets or sets the text. This will typically be the raw string the user enters into the search field.</param>
         public HunspellExpandOptions(string text) {
             Text = text;
+            CaseInsentive = true;
         }
 
         #endregion
