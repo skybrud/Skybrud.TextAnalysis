@@ -59,27 +59,31 @@ namespace Skybrud.TextAnalysis.Search {
         /// </summary>
         /// <param name="fields">The array fields.</param>
         /// <returns>A string representing the raw query.</returns>
-        public string ToRawQuery(string[] fields) {
+        public virtual string ToRawQuery(string[] fields) {
 
             List<string> temp = new List<string>();
 
             foreach (object item in Query) {
+                
+                switch (item) {
+                    
+                    case string str:
+                        List<string> temp2 = new List<string>();
+                        foreach (string field in fields) {
+                            temp2.Add($"{field}:{str}");
+                        }
+                        temp.Add($"({string.Join(" OR ", temp2)})");
+                        break;
+                    
+                    case ListBase list:
+                        temp.Add(list.ToRawQuery(fields));
+                        break;
 
-                if (item is string str) {
-                    List<string> temp2 = new List<string>();
-                    foreach (var field in fields) {
-                        temp2.Add(field + ":" + str);
-                    }
-                    temp.Add("(" + string.Join(" OR ", temp2) + ")");
-                }
-
-                if (item is ListBase list) {
-                    temp.Add(list.ToRawQuery(fields));
                 }
 
             }
 
-            return "(" + string.Join(" " + Operator + " ", temp) + ")";
+            return $"({string.Join($" {Operator} ", temp)})";
 
         }
 
@@ -88,7 +92,7 @@ namespace Skybrud.TextAnalysis.Search {
         /// </summary>
         /// <param name="fields">The collection fields.</param>
         /// <returns>A string representing the raw query.</returns>
-        public string ToRawQuery(IEnumerable<Field> fields) {
+        public virtual string ToRawQuery(IEnumerable<Field> fields) {
             return ToRawQuery(fields.ToArray());
         }
 
@@ -97,41 +101,45 @@ namespace Skybrud.TextAnalysis.Search {
         /// </summary>
         /// <param name="fields">The array fields.</param>
         /// <returns>A string representing the raw query.</returns>
-        public string ToRawQuery(Field[] fields) {
+        public virtual string ToRawQuery(Field[] fields) {
 
             List<string> temp = new List<string>();
 
             foreach (object item in Query) {
+                
+                switch (item)  {
+                    
+                    case string str: {
+                        
+                        List<string> temp2 = new List<string>();
 
-                if (item is string str) {
+                        foreach (Field field in fields) {
 
-                    List<string> temp2 = new List<string>();
+                            if (field.Boost != null) {
+                                temp2.Add($"{field.FieldName}:({str} {str}*)^{field.Boost}");
+                            }
 
-                    foreach (Field field in fields) {
+                            if (field.Fuzz != null) {
+                                temp2.Add($"{field.FieldName}:{str}~{field.Fuzz}");
+                            }
 
-                        if (field.Boost != null) {
-                            temp2.Add($"{field.FieldName}:({str} {str}*)^{field.Boost}");
+                            temp2.Add($"{field.FieldName}:{str}");
+
                         }
 
-                        if (field.Fuzz != null) {
-                            temp2.Add($"{field.FieldName}:{str}~{field.Fuzz}");
-                        }
-
-                        temp2.Add(field.FieldName + ":" + str);
-
+                        temp.Add($"({string.Join(" OR ", temp2)})");
+                        break;
                     }
+                    
+                    case ListBase list:
+                        temp.Add(list.ToRawQuery(fields));
+                        break;
 
-                    temp.Add("(" + string.Join(" OR ", temp2) + ")");
-
-                }
-
-                if (item is ListBase list) {
-                    temp.Add(list.ToRawQuery(fields));
                 }
 
             }
 
-            return "(" + string.Join(" " + Operator + " ", temp) + ")";
+            return $"({string.Join(" " + Operator + " ", temp)})";
 
         }
 
