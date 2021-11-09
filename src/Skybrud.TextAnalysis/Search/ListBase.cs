@@ -70,7 +70,7 @@ namespace Skybrud.TextAnalysis.Search {
                     case string str:
                         List<string> temp2 = new List<string>();
                         foreach (string field in fields) {
-                            temp2.Add($"{field}:{str}");
+                            temp2.Add($"{field}:({str} {str}*)");
                         }
                         temp.Add($"({string.Join(" OR ", temp2)})");
                         break;
@@ -123,7 +123,7 @@ namespace Skybrud.TextAnalysis.Search {
                                 temp2.Add($"{field.FieldName}:{str}~{field.Fuzz}");
                             }
 
-                            temp2.Add($"{field.FieldName}:{str}");
+                            temp2.Add($"{field.FieldName}:({str} {str}*)");
 
                         }
 
