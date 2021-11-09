@@ -9,7 +9,7 @@
   <PropertyGroup>
     <Version>1.0.4</Version>
     <Authors>Anders Bjerner</Authors>
-    <Company>Skybrud.dk</Company>
+    <Company>Limbo</Company>
     <Description>Hunspell text analysis package for .NET.</Description>
     <Copyright>Copyright © 2021</Copyright>
   </PropertyGroup>
@@ -19,7 +19,7 @@
     <PackageTags>Skybrud, Text, Analysis, Hunspell</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <!--<PackageProjectUrl>https://packages.skybrud.dk/skybrud.textanalysis/</PackageProjectUrl>-->
-    <PackageIconUrl>http://www.skybrud.dk/img/5431sk/icon/favicon.ico</PackageIconUrl>
+    <PackageIcon>Limbo.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/skybrud/Skybrud.TextAnalysis</RepositoryUrl>
   </PropertyGroup>
@@ -39,6 +39,10 @@
     <None Include="Hunspellx86.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../build/Limbo.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(ConfigurationName)'=='Release' AND '$(TargetFramework)'=='net472' AND '$(BuildTools)'=='1'">
