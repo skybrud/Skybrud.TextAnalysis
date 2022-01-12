@@ -139,7 +139,7 @@ namespace Skybrud.TextAnalysis.Search {
 
             }
 
-            return $"({string.Join(" " + Operator + " ", temp)})";
+            return $"({string.Join(" " + Operator + " ", temp.Distinct())})";
 
         }
 
