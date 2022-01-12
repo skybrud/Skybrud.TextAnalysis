@@ -80,6 +80,9 @@ namespace Skybrud.TextAnalysis.Hunspell {
         /// </summary>
         /// <param name="word">The word.</param>
         /// <returns>An array of <see cref="HunspellStemResult"/>.</returns>
+        /// <remarks>The <c>NHunspell</c> package we used in previous versions had support for multiple stems for a
+        /// given word (as the same word may have different meanings). The <c>WeCantSpell.Hunspell</c> doesn't support
+        /// this, so the array will always have a length of either <c>0</c> or <c>1</c>.</remarks>
         public HunspellStemResult[] Stem(string word) {
 
             SpellCheckResult details = WordList.CheckDetails(word);
@@ -191,7 +194,6 @@ namespace Skybrud.TextAnalysis.Hunspell {
 
                 List<HunspellExpandWord> temp2 = new List<HunspellExpandWord>();
                 temp1.Add(temp2);
-
 
                 string piece = pieces[i];
 
