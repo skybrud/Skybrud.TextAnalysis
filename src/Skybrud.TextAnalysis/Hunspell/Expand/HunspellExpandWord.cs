@@ -1,4 +1,5 @@
 ﻿using System;
+using Skybrud.TextAnalysis.Hunspell.Expand.Skybrud.TextAnalysis.Hunspell.Expand;
 
 namespace Skybrud.TextAnalysis.Hunspell.Expand {
 

@@ -1,5 +1,5 @@
 ﻿namespace Skybrud.TextAnalysis.Hunspell.Stem {
-    
+
     /// <summary>
     /// Class representing a Hunspell stem result.
     /// </summary>
@@ -20,6 +20,16 @@
         /// Gets the combined value of <see cref="Prefix"/> and <see cref="Stem"/>.
         /// </summary>
         public string Value { get; }
+
+        /// <summary>
+        /// Initializes a new instance based on the specified <paramref name="stem"/>.
+        /// </summary>
+        /// <param name="stem">The stem of the input word.</param>
+        public HunspellStemResult(string stem) {
+            Prefix = string.Empty;
+            Stem = stem;
+            Value = Prefix + Stem;
+        }
 
         /// <summary>
         /// Initializes a new instance based on the specified <paramref name="stem"/> and <paramref name="prefix"/>.

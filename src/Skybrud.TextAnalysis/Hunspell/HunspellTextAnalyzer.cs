@@ -1,32 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Skybrud.Essentials.Strings;
+using Skybrud.TextAnalysis.Hunspell.Affix;
 using Skybrud.TextAnalysis.Hunspell.Dictionary;
 using Skybrud.TextAnalysis.Hunspell.Expand;
+using Skybrud.TextAnalysis.Hunspell.Expand.Skybrud.TextAnalysis.Hunspell.Expand;
 using Skybrud.TextAnalysis.Hunspell.Stem;
 using Skybrud.TextAnalysis.Search;
+using WeCantSpell.Hunspell;
 
 namespace Skybrud.TextAnalysis.Hunspell {
-
+    
     /// <summary>
-    /// Wrapper class for <see cref="NHunspell.Hunspell"/>, <see cref="Affix"/> and <see cref="HunspellDictionary"/>.
+    /// Class representing a Hunspell text analyzer that wraps the dictionary and affix file functionalities.
     /// </summary>
     public class HunspellTextAnalyzer {
 
         #region Properties
-
+        
         /// <summary>
-        /// Gets a reference to the underlying <see cref="NHunspell.Hunspell"/>.
+        /// Gets a reference to the underlying Hunspell word list.
         /// </summary>
-        public NHunspell.Hunspell Hunspell { get; }
+        public WordList WordList { get; }
 
         /// <summary>
-        /// Gets a reference to the underlying <see cref="Affix"/>.
+        /// Gets a reference to the underlying Hunspell affix file.
         /// </summary>
-        public Affix.HunspellAffix Affix { get; }
-
+        public HunspellAffix Affix { get; }
+        
         /// <summary>
-        /// Gets a reference to the underlying <see cref="HunspellDictionary"/>.
+        /// Gets a reference to the underlying Hunspell dictionary file.
         /// </summary>
         public HunspellDictionary Dictionary { get; }
 
@@ -35,25 +40,15 @@ namespace Skybrud.TextAnalysis.Hunspell {
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance rom the specified <paramref name="hunspell"/>, <paramref name="affix"/> and <paramref name="dictionary"/> instances.
+        /// Initializes a new instance based on the specified <paramref name="wordList"/>, <paramref name="affix"/> file and <paramref name="dictionary"/> file.
         /// </summary>
-        /// <param name="hunspell">The Hunspell instance to be used.</param>
-        /// <param name="affix">The affix instance to be used.</param>
-        /// <param name="dictionary">The custom dictionary to be used.</param>
-        public HunspellTextAnalyzer(NHunspell.Hunspell hunspell, Affix.HunspellAffix affix, HunspellDictionary dictionary) {
-            Hunspell = hunspell;
+        /// <param name="wordList">A reference to the word list.</param>
+        /// <param name="affix">A reference to the affix file.</param>
+        /// <param name="dictionary">A reference to the dictionary file.</param>
+        public HunspellTextAnalyzer(WordList wordList, HunspellAffix affix, HunspellDictionary dictionary) {
+            WordList = wordList;
             Affix = affix;
             Dictionary = dictionary;
-        }
-
-        /// <summary>
-        /// Initializes a new instance rom the specified <paramref name="wrapper"/> instances.
-        /// </summary>
-        /// <param name="wrapper">The Hunspell wrapper instance to be used.</param>
-        public HunspellTextAnalyzer(HunspellWrapper wrapper) {
-            Hunspell = wrapper.Hunspell;
-            Affix = wrapper.Affix;
-            Dictionary = wrapper.Dictionary;
         }
 
         #endregion
@@ -61,33 +56,61 @@ namespace Skybrud.TextAnalysis.Hunspell {
         #region Member methods
 
         /// <summary>
-        /// Returns whether the specified <paramref name="word"/> is spelled correctly. Same as calling the
-        /// <see cref="NHunspell.Hunspell.Spell"/> method directly.
+        /// Returns whether the specified <paramref name="word"/> is spelled correctly. Same as calling the <see cref="WeCantSpell.Hunspell.WordList.Check"/> method directly.
         /// </summary>
         /// <param name="word">The word to check.</param>
-        /// <returns></returns>
+        /// <returns><c>true</c> of <paramref name="word"/> is spelled correctly; otherwise <c>false</c>.</returns>
         public bool Spell(string word) {
-            return Hunspell.Spell(word);
+            return WordList.Check(word);
+        }
+        
+        /// <summary>
+        /// Returns whether the specified <paramref name="word"/> is spelled correctly. Same as calling the <see cref="WeCantSpell.Hunspell.WordList.Check"/> method directly.
+        /// </summary>
+        /// <param name="word">The word to check.</param>
+        /// <param name="result">When this method returns, the value will contain information about the word.</param>
+        /// <returns><c>true</c> of <paramref name="word"/> is spelled correctly; otherwise <c>false</c>.</returns>
+        public bool Spell(string word, out SpellCheckResult result) {
+            result = WordList.CheckDetails(word);
+            return result.Correct;
         }
 
         /// <summary>
-        /// Gets an array of stems for the specified <paramref name="word"/>.
+        /// Returns an array with the stems of the specified <paramref name="word"/>.
         /// </summary>
-        /// <param name="word">The word to get the stem(s) for.</param>
+        /// <param name="word">The word.</param>
         /// <returns>An array of <see cref="HunspellStemResult"/>.</returns>
-        /// <remarks>This method is similar to the <see cref="NHunspell.Hunspell.Stem"/> method, but differs in the way
-        /// that has better support for working with compound words. For instance in Danish, the stem of
-        /// <c>webredaktør</c> is <c>redaktør</c> because <c>webredaktør</c> isn't in the dictionary. And if we try to
-        /// morph the stem, we get variations of <c>redaktør</c> instead of <c>webredaktør</c>. When morphing an
-        /// instance of <see cref="HunspellStemResult"/>, the prefix (if any) is kept in the morphed variations.
-        /// </remarks>
         public HunspellStemResult[] Stem(string word) {
+
+            SpellCheckResult details = WordList.CheckDetails(word);
+
+            if (!details.Correct) return new HunspellStemResult[0];
+
+            if (string.IsNullOrEmpty(details.Root)) {
+                return new[] {
+                    new HunspellStemResult(word, null)
+                };
+            }
 
             List<HunspellStemResult> temp = new List<HunspellStemResult>();
 
-            foreach (string stem in Hunspell.Stem(word)) {
-                int pos = word.IndexOf(stem, StringComparison.InvariantCultureIgnoreCase);
-                temp.Add(new HunspellStemResult(stem, pos > 0 ? word.Substring(0, pos) : null));
+            if (details.Info.HasFlag(SpellCheckResultType.Compound)) {
+                
+                if (string.IsNullOrEmpty(details.Root)) throw new Exception("NAH");
+                if (word.IndexOf(details.Root, StringComparison.OrdinalIgnoreCase) > 0)  throw new Exception("NAH 2");
+
+                string prefix = details.Root;
+
+                word = word.Substring(prefix.Length);
+
+                details = WordList.CheckDetails(word);
+
+                temp.Add(new HunspellStemResult(string.IsNullOrWhiteSpace(details.Root) ? word : details.Root, prefix));
+
+            } else {
+
+                temp.Add(new HunspellStemResult(details.Root));
+
             }
 
             return temp.ToArray();
@@ -126,7 +149,16 @@ namespace Skybrud.TextAnalysis.Hunspell {
         /// <param name="word">The (misspelled) word.</param>
         /// <returns>An array of suggestions.</returns>
         public string[] Suggest(string word) {
-            return Hunspell.Suggest(word).ToArray();
+            
+            // The underlying Hunspell package may throw an OutOfBounds exception for all capital words (eg.
+            // abbreviations), so since the package won't be able to provide any suggestions for "word", we might as
+            // well catch the exception and return an empty array (aka no suggestions)
+            try {
+                return WordList.Suggest(word).ToArray();
+            } catch {
+                return new string[0];
+            }
+
         }
 
         /// <summary>
@@ -168,12 +200,12 @@ namespace Skybrud.TextAnalysis.Hunspell {
                 OrList or = new OrList { Name = "O0" };
                 query.Query.Add(or);
 
-                if (IsAlpha(piece) == false) {
+                if (StringUtils.IsAlphabetic(piece) == false) {
                     or.Append(piece);
                     continue;
                 }
 
-                if (Hunspell.Spell(piece)) {
+                if (Spell(piece)) {
 
                     if (i < pieces.Length - 1) {
 
@@ -197,11 +229,11 @@ namespace Skybrud.TextAnalysis.Hunspell {
                                 break;
                         }
 
-                        if (ignore == false && Hunspell.Spell(z)) {
+                        if (ignore == false && Spell(z)) {
 
                             AndList a2 = new AndList { Name = "A2" };
                             
-                            if (Hunspell.Spell(x)) {
+                            if (Spell(x)) {
                                 
                                 OrList or1 = new OrList { Name = "O1" };
                                 
@@ -221,7 +253,7 @@ namespace Skybrud.TextAnalysis.Hunspell {
                                 a2.Append(x);
                             }
 
-                            if (Hunspell.Spell(y)) {
+                            if (Spell(y)) {
                                 
                                 OrList or2 = new OrList { Name = "O2" };
 
@@ -305,14 +337,14 @@ namespace Skybrud.TextAnalysis.Hunspell {
                         string z = x + y;
 
                         // Are "x" and "y" spelled correctly when put together as a single word? (eg. compound words in Danish)
-                        if (Hunspell.Spell(z)) {
+                        if (Spell(z)) {
 
                             AndList and = new AndList();
                             or.Query.Add(and);
 
                             and.Append(x);
 
-                            if (Hunspell.Spell(y)) {
+                            if (Spell(y)) {
                                 
                                 OrList or2 = new OrList();
                                 and.Query.Add(or2);
@@ -400,7 +432,7 @@ namespace Skybrud.TextAnalysis.Hunspell {
                     foreach (string suggestion in suggestions) {
 
                         // Calculate the Levenshtein distance
-                        int distance = Levenshtein(piece, suggestion);
+                        int distance = StringUtils.Levenshtein(piece, suggestion);
 
                         // Skip the suggestion if the Levenshtein distance is higher than the allowed maximum
                         if (options.MaxDistance > 0 && distance > options.MaxDistance) continue;
@@ -428,57 +460,30 @@ namespace Skybrud.TextAnalysis.Hunspell {
 
         }
 
+        #endregion
+
+        #region Static methods
+
         /// <summary>
-        /// Computes the Levenshtein distance between two strings.
+        /// Initializes a new Hunspell text analyzer from the specified <paramref name="dictionaryPath"/> and <paramref name="affixPath"/>.
         /// </summary>
-        /// <see>
-        ///     <cref>http://www.dotnetperls.com/levenshtein</cref>
-        /// </see>
-        private int Levenshtein(string s, string t) {
+        /// <param name="dictionaryPath">The path to the dictionary (<c>.dic</c>) file.</param>
+        /// <param name="affixPath">The path to the dictionary (<c>.aff</c>) file.</param>
+        /// <returns>A new <see cref="HunspellTextAnalyzer"/>.</returns>
+        public static HunspellTextAnalyzer CreateFromFiles(string dictionaryPath, string affixPath) {
 
-            // TODO: Use Skybrud.Essentials.Strings.StringUtils.Levenshtein instead
+            using FileStream dictionaryStream = File.OpenRead(dictionaryPath);
 
-            int n = s.Length;
-            int m = t.Length;
-            int[,] d = new int[n + 1, m + 1];
+            using FileStream affixStream = File.OpenRead(affixPath);
+    
+            WordList wordList = WordList.CreateFromStreams(dictionaryStream, affixStream);
 
-            // Step 1
-            if (n == 0) {
-                return m;
-            }
+            HunspellAffix affix = HunspellAffix.Load(affixPath);
 
-            if (m == 0) {
-                return n;
-            }
+            HunspellDictionary dictionary = HunspellDictionary.Load(dictionaryPath, affix);
 
-            // Step 2
-            for (int i = 0; i <= n; d[i, 0] = i++) {
-            }
+            return new HunspellTextAnalyzer(wordList, affix, dictionary);
 
-            for (int j = 0; j <= m; d[0, j] = j++) {
-            }
-
-            // Step 3
-            for (int i = 1; i <= n; i++) {
-                //Step 4
-                for (int j = 1; j <= m; j++) {
-                    // Step 5
-                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
-
-                    // Step 6
-                    d[i, j] = Math.Min(
-                        Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
-                        d[i - 1, j - 1] + cost);
-                }
-            }
-            // Step 7
-            return d[n, m];
-
-        }
-
-        private bool IsAlpha(string value) {
-            // TODO: Use Skybrud.Essentials.Strings.StringUtils.IsAlphabetic instead
-            return value?.All(char.IsLetter) ?? false;
         }
 
         #endregion

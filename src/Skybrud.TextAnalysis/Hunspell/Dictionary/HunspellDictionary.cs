@@ -54,29 +54,79 @@ namespace Skybrud.TextAnalysis.Hunspell.Dictionary {
 
             Dictionary<string, List<HunspellDictionaryItem>> temp = new Dictionary<string, List<HunspellDictionaryItem>>();
 
-            foreach (string line in File.ReadAllLines(path).Skip(1)) {
+            string[] lines = File.ReadAllLines(path);
 
-                if (line == "lægge, lægger, lægges, lagde, lagdes, læggende, læggendes, lagt, lagts, lagte, lagtes, læg") continue;
+            for (int i = 1; i < lines.Length - 1; i++) {
 
-                string[] hest = line.Split('/', ',');
+                string line = lines[i];
+
+                if (string.IsNullOrWhiteSpace(line)) continue;
 
                 try {
 
-                    HunspellDictionaryItem item = new HunspellDictionaryItem(hest[0], hest.Skip(1).Select(int.Parse).ToArray(), affix);
+                    if (line == "lægge, lægger, lægges, lagde, lagdes, læggende, læggendes, lagt, lagts, lagte, lagtes, læg") continue;
+                
+                    // Danish dictionary have some additional comments or operators that makes the parser fail, so we need to skip those
+                    int index = line.IndexOf(" al:", StringComparison.CurrentCultureIgnoreCase);
+                    if (index > 0) line = line.Substring(0, index);
+                    
+                    index = line.IndexOf(" st:", StringComparison.CurrentCultureIgnoreCase);
+                    if (index > 0) line = line.Substring(0, index);
 
-                    // Sammensætning, fugeelement
-                    if (item.Flags.Length > 0 && item.Flags[0] == 941) continue;
+                    index = line.IndexOf(" ph:", StringComparison.CurrentCultureIgnoreCase);
+                    if (index > 0) line = line.Substring(0, index);
+                    
+                    string word;
+                    string options;
 
-                    if (temp.TryGetValue(item.Stem, out List<HunspellDictionaryItem> list) == false) {
-                        list = new List<HunspellDictionaryItem>();
-                        temp.Add(item.Stem, list);
+                    if (line[0] == '"') {
+                        
+                        index = line.IndexOf("\"", 1, StringComparison.Ordinal);
+                        if (index < 0) throw new Exception($"Unable to parse line {i + 1}: {line}");
+
+                        word = line.Substring(1, index - 1);
+
+                        options = line.Substring(index + 1);
+
+                    } else {
+                        
+                        index = line.IndexOf("/", 1, StringComparison.Ordinal);
+
+                        if (index > 0) {
+                            word = line.Substring(0, index);
+                            options = line.Substring(index + 1);
+                        } else {
+                            word = line;
+                            options = string.Empty;
+                        }
+
                     }
 
-                    list.Add(item);
+                    try {
+
+                        int[] flags = string.IsNullOrWhiteSpace(options) ? new int[0] : options.Split(',').Select(int.Parse).ToArray();
+
+                        HunspellDictionaryItem item = new HunspellDictionaryItem(word, flags, affix);
+
+                        // Sammensætning, fugeelement
+                        if (item.Flags.Length > 0 && item.Flags[0] == 941) continue;
+
+                        if (temp.TryGetValue(item.Stem, out List<HunspellDictionaryItem> list) == false) {
+                            list = new List<HunspellDictionaryItem>();
+                            temp.Add(item.Stem, list);
+                        }
+
+                        list.Add(item);
+
+                    } catch (Exception ex) {
+
+                        throw new Exception($"Unable to parse line {i + 1}: {line}\r\n\r\nWord: {word}\r\nOptions: {options}", ex);
+
+                    }
 
                 } catch (Exception ex) {
 
-                    throw new Exception("Unable to parse line: " + line, ex);
+                    throw new Exception($"Unable to parse line {i + 1}: {line}", ex);
 
                 }
 
