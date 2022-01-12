@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Skybrud.TextAnalysis.Hunspell;
-using Skybrud.TextAnalysis.Hunspell.Stem;
 
 namespace UnitTestProject1.Hunspell  {
     

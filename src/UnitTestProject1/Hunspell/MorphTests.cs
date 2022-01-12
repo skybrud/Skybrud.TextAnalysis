@@ -1,9 +1,7 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Skybrud.TextAnalysis.Hunspell;
 using Skybrud.TextAnalysis.Hunspell.Stem;
-using Skybrud.Essentials.Strings.Extensions;
 
 namespace UnitTestProject1.Hunspell  {
     
@@ -11,7 +9,7 @@ namespace UnitTestProject1.Hunspell  {
     public class MorphTests {
         
         [TestMethod]
-        public void Hesten_Stem() {
+        public void Hesten() {
 
             HunspellTextAnalyzer analyzer = UnitTestHelper.GetDanishTextAnalyzer();
 
@@ -35,7 +33,12 @@ namespace UnitTestProject1.Hunspell  {
         }
         
         [TestMethod]
-        public void Webredaktør_Stem() {
+        public void webredaktør() {
+
+            // "webredaktør" is an interesting case to test as it's a compound word (made up of "web" and "redaktør").
+            // When finding the stem of a word (which in this case would just be "redaktør", our package keeps track of
+            // both the actual stem (eg. "redaktør") and a prefix (eg. "web"). So while we're technically morphing
+            // "redaktør", our package ensures that the prefix is added to each word resulting from the morph operation.
 
             HunspellTextAnalyzer analyzer = UnitTestHelper.GetDanishTextAnalyzer();
 
