@@ -2,3 +2,5 @@ src/packages/
 src/Skybrud.TextAnalysis/bin/
 src/Skybrud.TextAnalysis/obj/
 src/.vs/
+src/UnitTestProject1/bin/
+src/UnitTestProject1/obj/
