@@ -18,12 +18,24 @@ namespace Skybrud.TextAnalysis.Hunspell.Dictionary {
         /// </summary>
         public Dictionary<string, List<HunspellDictionaryItem>> Dictionary { get; }
 
+        /// <summary>
+        /// If loading the dictionary fails, the <see cref="Exception"/> property with the exception describing why the load failed.
+        /// </summary>
+        public Exception Exception { get; }
+
+        /// <summary>
+        /// Gets whether the dictionary was successfully loaded.
+        /// </summary>
+        public bool IsSuccessful { get; }
+
         #endregion
 
         #region Constructors
 
-        private HunspellDictionary(Dictionary<string, List<HunspellDictionaryItem>> dictionary) {
+        private HunspellDictionary(Dictionary<string, List<HunspellDictionaryItem>> dictionary, Exception exception) {
             Dictionary = dictionary;
+            Exception = exception;
+            IsSuccessful = exception == null;
         }
 
         #endregion
@@ -54,85 +66,93 @@ namespace Skybrud.TextAnalysis.Hunspell.Dictionary {
 
             Dictionary<string, List<HunspellDictionaryItem>> temp = new Dictionary<string, List<HunspellDictionaryItem>>();
 
-            string[] lines = File.ReadAllLines(path);
+            try {
 
-            for (int i = 1; i < lines.Length - 1; i++) {
+                string[] lines = File.ReadAllLines(path);
 
-                string line = lines[i];
+                for (int i = 1; i < lines.Length - 1; i++) {
 
-                if (string.IsNullOrWhiteSpace(line)) continue;
+                    string line = lines[i];
 
-                try {
-
-                    if (line == "lægge, lægger, lægges, lagde, lagdes, læggende, læggendes, lagt, lagts, lagte, lagtes, læg") continue;
-                
-                    // Danish dictionary have some additional comments or operators that makes the parser fail, so we need to skip those
-                    int index = line.IndexOf(" al:", StringComparison.CurrentCultureIgnoreCase);
-                    if (index > 0) line = line.Substring(0, index);
-                    
-                    index = line.IndexOf(" st:", StringComparison.CurrentCultureIgnoreCase);
-                    if (index > 0) line = line.Substring(0, index);
-
-                    index = line.IndexOf(" ph:", StringComparison.CurrentCultureIgnoreCase);
-                    if (index > 0) line = line.Substring(0, index);
-                    
-                    string word;
-                    string options;
-
-                    if (line[0] == '"') {
-                        
-                        index = line.IndexOf("\"", 1, StringComparison.Ordinal);
-                        if (index < 0) throw new Exception($"Unable to parse line {i + 1}: {line}");
-
-                        word = line.Substring(1, index - 1);
-
-                        options = line.Substring(index + 1);
-
-                    } else {
-                        
-                        index = line.IndexOf("/", 1, StringComparison.Ordinal);
-
-                        if (index > 0) {
-                            word = line.Substring(0, index);
-                            options = line.Substring(index + 1);
-                        } else {
-                            word = line;
-                            options = string.Empty;
-                        }
-
-                    }
+                    if (string.IsNullOrWhiteSpace(line)) continue;
 
                     try {
 
-                        int[] flags = string.IsNullOrWhiteSpace(options) ? new int[0] : options.Split(',').Select(int.Parse).ToArray();
+                        if (line == "lægge, lægger, lægges, lagde, lagdes, læggende, læggendes, lagt, lagts, lagte, lagtes, læg") continue;
+                    
+                        // Danish dictionary have some additional comments or operators that makes the parser fail, so we need to skip those
+                        int index = line.IndexOf(" al:", StringComparison.CurrentCultureIgnoreCase);
+                        if (index > 0) line = line.Substring(0, index);
+                        
+                        index = line.IndexOf(" st:", StringComparison.CurrentCultureIgnoreCase);
+                        if (index > 0) line = line.Substring(0, index);
 
-                        HunspellDictionaryItem item = new HunspellDictionaryItem(word, flags, affix);
+                        index = line.IndexOf(" ph:", StringComparison.CurrentCultureIgnoreCase);
+                        if (index > 0) line = line.Substring(0, index);
+                        
+                        string word;
+                        string options;
 
-                        // Sammensætning, fugeelement
-                        if (item.Flags.Length > 0 && item.Flags[0] == 941) continue;
+                        if (line[0] == '"') {
+                            
+                            index = line.IndexOf("\"", 1, StringComparison.Ordinal);
+                            if (index < 0) throw new Exception($"Unable to parse line {i + 1}: {line}");
 
-                        if (temp.TryGetValue(item.Stem, out List<HunspellDictionaryItem> list) == false) {
-                            list = new List<HunspellDictionaryItem>();
-                            temp.Add(item.Stem, list);
+                            word = line.Substring(1, index - 1);
+
+                            options = line.Substring(index + 1);
+
+                        } else {
+                            
+                            index = line.IndexOf("/", 1, StringComparison.Ordinal);
+
+                            if (index > 0) {
+                                word = line.Substring(0, index);
+                                options = line.Substring(index + 1);
+                            } else {
+                                word = line;
+                                options = string.Empty;
+                            }
+
                         }
 
-                        list.Add(item);
+                        try {
+
+                            int[] flags = string.IsNullOrWhiteSpace(options) ? new int[0] : options.Split(',').Select(int.Parse).ToArray();
+
+                            HunspellDictionaryItem item = new HunspellDictionaryItem(word, flags, affix);
+
+                            // Sammensætning, fugeelement
+                            if (item.Flags.Length > 0 && item.Flags[0] == 941) continue;
+
+                            if (temp.TryGetValue(item.Stem, out List<HunspellDictionaryItem> list) == false) {
+                                list = new List<HunspellDictionaryItem>();
+                                temp.Add(item.Stem, list);
+                            }
+
+                            list.Add(item);
+
+                        } catch (Exception ex) {
+
+                            throw new Exception($"Unable to parse line {i + 1}: {line}\r\n\r\nWord: {word}\r\nOptions: {options}", ex);
+
+                        }
 
                     } catch (Exception ex) {
 
-                        throw new Exception($"Unable to parse line {i + 1}: {line}\r\n\r\nWord: {word}\r\nOptions: {options}", ex);
+                        throw new Exception($"Unable to parse line {i + 1}: {line}", ex);
 
                     }
 
-                } catch (Exception ex) {
-
-                    throw new Exception($"Unable to parse line {i + 1}: {line}", ex);
-
                 }
 
-            }
+                return new HunspellDictionary(temp, null);
 
-            return new HunspellDictionary(temp);
+            } catch (Exception ex) {
+
+                return new HunspellDictionary(temp, ex);
+
+            }
 
         }
 
