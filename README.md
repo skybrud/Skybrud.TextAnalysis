@@ -1,4 +1,4 @@
-# Skybrud.TextAnalysis
+# Skybrud.TextAnalysis [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md) [![NuGet](https://img.shields.io/nuget/v/Skybrud.TextAnalysis.svg)](https://www.nuget.org/packages/Skybrud.TextAnalysis) [![NuGet](https://img.shields.io/nuget/dt/Skybrud.TextAnalysis.svg)](https://www.nuget.org/packages/Skybrud.TextAnalysis)
 
 `Skybrud.TextAnalysis` is a Hunspell wrapper and text analysis package for .NET.
 
