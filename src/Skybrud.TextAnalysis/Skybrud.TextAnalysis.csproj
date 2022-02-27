@@ -19,7 +19,7 @@
     <PackageId>Skybrud.TextAnalysis</PackageId>
     <PackageTags>Skybrud, Text, Analysis, Hunspell</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <!--<PackageProjectUrl>https://packages.skybrud.dk/skybrud.textanalysis/</PackageProjectUrl>-->
+    <PackageProjectUrl>https://packages.skybrud.dk/skybrud.textanalysis/</PackageProjectUrl>
     <PackageIcon>Limbo.png</PackageIcon>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/skybrud/Skybrud.TextAnalysis</RepositoryUrl>
