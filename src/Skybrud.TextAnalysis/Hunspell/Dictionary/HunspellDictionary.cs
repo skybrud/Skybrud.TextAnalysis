@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Skybrud.Essentials.Strings;
 using Skybrud.TextAnalysis.Hunspell.Affix;
 
 namespace Skybrud.TextAnalysis.Hunspell.Dictionary {
@@ -118,12 +119,22 @@ namespace Skybrud.TextAnalysis.Hunspell.Dictionary {
 
                         try {
 
-                            int[] flags = string.IsNullOrWhiteSpace(options) ? new int[0] : options.Split(',').Select(int.Parse).ToArray();
+                            // Check whether the options contain at least one comma. Different dictionaries use
+                            // different formats, so we need to detect this in order to parse the options and any flags
+                            bool hasCommas = options.IndexOf(',') >= 0;
+
+                            string[] flags;
+
+                            if (!hasCommas && StringUtils.IsAlphabetic(options)) {
+                                flags = options.Select(x => x.ToString()).ToArray();
+                            } else {
+                                flags = string.IsNullOrWhiteSpace(options) ? new string[0] : options.Split(',');
+                            }
 
                             HunspellDictionaryItem item = new HunspellDictionaryItem(word, flags, affix);
 
                             // Sammensætning, fugeelement
-                            if (item.Flags.Length > 0 && item.Flags[0] == 941) continue;
+                            if (item.Flags.Length > 0 && item.Flags[0] == "941") continue;
 
                             if (temp.TryGetValue(item.Stem, out List<HunspellDictionaryItem> list) == false) {
                                 list = new List<HunspellDictionaryItem>();

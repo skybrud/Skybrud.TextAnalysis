@@ -22,7 +22,7 @@ namespace Skybrud.TextAnalysis.Hunspell.Dictionary {
         /// <summary>
         /// Gets the flags of the item.
         /// </summary>
-        public int[] Flags { get; }
+        public string[] Flags { get; }
 
         /// <summary>
         /// Gets the most likely type of the item.
@@ -59,7 +59,7 @@ namespace Skybrud.TextAnalysis.Hunspell.Dictionary {
         /// <param name="stem">The stem of the item.</param>
         /// <param name="flags">The flags of the item.</param>
         /// <param name="affix">A reference to the parent affix file.</param>
-        public HunspellDictionaryItem(string stem, int[] flags, HunspellAffix affix) {
+        public HunspellDictionaryItem(string stem, string[] flags, HunspellAffix affix) {
             Stem = stem;
             Flags = flags;
             Affix = affix;
@@ -77,25 +77,25 @@ namespace Skybrud.TextAnalysis.Hunspell.Dictionary {
 
             _variants.Add(new Variant(Stem, string.Empty));
 
-            if (Flags.Contains(55)) _type = HunspellDictionaryItemType.Proprium;
+            if (Flags.Contains("55")) _type = HunspellDictionaryItemType.Proprium;
 
-            if (Flags.Contains(6)) _type = HunspellDictionaryItemType.Verbum;
-            if (Flags.Contains(140)) _type = HunspellDictionaryItemType.Verbum;
-            if (Flags.Contains(143)) _type = HunspellDictionaryItemType.Verbum;
-            if (Flags.Contains(148)) _type = HunspellDictionaryItemType.Verbum;
+            if (Flags.Contains("6")) _type = HunspellDictionaryItemType.Verbum;
+            if (Flags.Contains("140")) _type = HunspellDictionaryItemType.Verbum;
+            if (Flags.Contains("143")) _type = HunspellDictionaryItemType.Verbum;
+            if (Flags.Contains("148")) _type = HunspellDictionaryItemType.Verbum;
 
-            if (Flags.Contains(46)) _type = HunspellDictionaryItemType.Substantiv;
-            if (Flags.Contains(73)) _type = HunspellDictionaryItemType.Substantiv;
-            if (Flags.Contains(193)) _type = HunspellDictionaryItemType.Substantiv;
-            if (Flags.Contains(194)) _type = HunspellDictionaryItemType.Substantiv;
-            if (Flags.Contains(252)) _type = HunspellDictionaryItemType.Substantiv;
-            if (Flags.Contains(254)) _type = HunspellDictionaryItemType.Substantiv;
-            if (Flags.Contains(736)) _type = HunspellDictionaryItemType.Substantiv;
-            if (Flags.Contains(737)) _type = HunspellDictionaryItemType.Substantiv;
-            if (Flags.Contains(815)) _type = HunspellDictionaryItemType.Substantiv;
+            if (Flags.Contains("46")) _type = HunspellDictionaryItemType.Substantiv;
+            if (Flags.Contains("73")) _type = HunspellDictionaryItemType.Substantiv;
+            if (Flags.Contains("193")) _type = HunspellDictionaryItemType.Substantiv;
+            if (Flags.Contains("194")) _type = HunspellDictionaryItemType.Substantiv;
+            if (Flags.Contains("252")) _type = HunspellDictionaryItemType.Substantiv;
+            if (Flags.Contains("254")) _type = HunspellDictionaryItemType.Substantiv;
+            if (Flags.Contains("736")) _type = HunspellDictionaryItemType.Substantiv;
+            if (Flags.Contains("737")) _type = HunspellDictionaryItemType.Substantiv;
+            if (Flags.Contains("815")) _type = HunspellDictionaryItemType.Substantiv;
             
-            foreach (int flag in Flags) {
-                if (Affix.SuffixRuleSets.TryGetValue(flag.ToString(), out SuffixRuleSet ruleSet)) {
+            foreach (string flag in Flags) {
+                if (Affix.SuffixRuleSets.TryGetValue(flag, out SuffixRuleSet ruleSet)) {
                     ruleSet.Process(this);
                 }
             }
