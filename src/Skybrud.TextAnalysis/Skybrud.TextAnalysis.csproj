@@ -26,7 +26,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Skybrud.Essentials" Version="1.1.34" />
+    <PackageReference Include="Skybrud.Essentials" Version="1.1.36" />
     <PackageReference Include="WeCantSpell.Hunspell" Version="3.0.1" />
   </ItemGroup>
 
