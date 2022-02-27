@@ -2,6 +2,8 @@
 
 `Skybrud.TextAnalysis` is a Hunspell wrapper and text analysis package for .NET.
 
+Building on top of the [**WeCantSpell.Hunspell**](https://github.com/aarondandy/WeCantSpell.Hunspell) package, our analyzer supports [spell checking](https://packages.skybrud.dk/skybrud.textanalysis/docs/v2.0/spell-checking/), getting [suggestions](https://packages.skybrud.dk/skybrud.textanalysis/docs/v2.0/suggestions/), [stemming](https://packages.skybrud.dk/skybrud.textanalysis/docs/v2.0/stemming/) as well as our own implementations of 
+[morphing](https://packages.skybrud.dk/skybrud.textanalysis/docs/v2.0/morphing/) and [expanding](https://packages.skybrud.dk/skybrud.textanalysis/docs/v2.0/expanding/).
 
 
 ## Installation
