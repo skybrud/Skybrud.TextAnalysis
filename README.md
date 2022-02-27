@@ -8,16 +8,16 @@ Building on top of the [**WeCantSpell.Hunspell**](https://github.com/aarondandy/
 
 ## Installation
 
-Via <a href="https://www.nuget.org/packages/Skybrud.TextAnalysis/2.0.0-beta001" target="_blank">NuGet</a>:
+Via <a href="https://www.nuget.org/packages/Skybrud.TextAnalysis/2.0.0" target="_blank">NuGet</a>:
 
 ```
-dotnet add package Skybrud.TextAnalysis --version 2.0.0-beta001
+dotnet add package Skybrud.TextAnalysis --version 2.0.0
 ```
 
 or:
 
 ```
-Install-Package Skybrud.TextAnalysis -Version 2.0.0-beta001
+Install-Package Skybrud.TextAnalysis -Version 2.0.0
 ```
 
 
