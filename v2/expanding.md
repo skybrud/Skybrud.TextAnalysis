@@ -43,7 +43,7 @@ Ideally we shouldn't be searching for **bike** twice, but this is currently a mi
 
 In the example with **bikr**, we are basing the search on the misspelled word as well as any suggested words for **bikr**. 
 
-With the Danish dictionary from <a href="https://stavekontrolden.dk/" target="_blank" rel="noopener"><strong>Stavekontrolden</strong></a>, our implementation supports [**morphing**](../morphing/) - meaning that for each word in the search text, we can find it's stem word, and then get all the inflections of the stem word.
+With the Danish dictionary from <a href="https://stavekontrolden.dk/" target="_blank" rel="noopener"><strong>Stavekontrolden</strong></a>, our implementation supports [**morphing**](./../morphing/) - meaning that for each word in the search text, we can find it's stem word, and then get all the inflections of the stem word.
 
 Since the Danish affix file is structured a bit different than the other affix files I've been able to test with, morphing unfortunately isn't supported for other languages (eg. `en-US` or `en-GB`).
 

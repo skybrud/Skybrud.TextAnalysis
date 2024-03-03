@@ -12,7 +12,7 @@ order: 4
     Unfortunately, our implementation has currently only been confirmed working with the Danish dictionary files provided by <a href="https://stavekontrolden.dk/" target="_blank" rel="noopener"><strong>Stavekontrolden</strong></a>.
 </div>
 
-The `Morph` methods needs an instance of `HunspellStemResult` from a successful [**stem operation**](../stemming/) - eg. as shown in the example below where we're finding the stem words of the Danish **cykel**:
+The `Morph` methods needs an instance of `HunspellStemResult` from a successful [**stem operation**](./../stemming/) - eg. as shown in the example below where we're finding the stem words of the Danish **cykel**:
 
 
 ```csharp

@@ -30,7 +30,7 @@ The underlying **WeCantSpell.Hunspell** package doesn't support stemming directl
 
 In this example, the `Stem` method returns an array with the stem word **bike** as the only item.
 
-Notice that the underlying **WeCantSpell.Hunspell** package doesn't support returning multiple stem words (opposed to the older **NHunspell** package used in [**v1.x**](../../v1.x/) of this package).
+Notice that the underlying **WeCantSpell.Hunspell** package doesn't support returning multiple stem words (opposed to the older **NHunspell** package used in **`v1.x`** of this package).
 
 ## Compound Words
 
@@ -38,7 +38,7 @@ In some languages (eg. Danish), compound words are spelled as one word (without 
 
 This gives a few problems with the implementation in the **WeCantSpell.Hunspell** package, so the `HunspellStemResult` class is something we've build on top of their implementation.
 
-To add better support for working with compound words in these languages, the `HunspellStemResult` class exposes the `Stem` and `Prefix` properties, as well as the `Value` property, which is a mix of the `Prefix` and `Stem` properties. This is in particular useful for [**morph operations**](../morphing/).
+To add better support for working with compound words in these languages, the `HunspellStemResult` class exposes the `Stem` and `Prefix` properties, as well as the `Value` property, which is a mix of the `Prefix` and `Stem` properties. This is in particular useful for [**morph operations**](./../morphing/).
 
 ```csharp
 @using System.Web.Hosting
@@ -69,4 +69,4 @@ To add better support for working with compound words in these languages, the `H
 }
 ```
 
-In this example, the Danish compound word **webredaktører** will be split into **web** (`Prefix` property) and **redaktør** (`Stem` property), which then combined is **webredaktør** (`Value` property). [**Morph operations**](../morphing/) will only be based on the stem, but then the prefix is automatically prepended to each inflection returned by the morph operation, ensuring the final result is still correct for compounded words.
+In this example, the Danish compound word **webredaktører** will be split into **web** (`Prefix` property) and **redaktør** (`Stem` property), which then combined is **webredaktør** (`Value` property). [**Morph operations**](./../morphing/) will only be based on the stem, but then the prefix is automatically prepended to each inflection returned by the morph operation, ensuring the final result is still correct for compounded words.
